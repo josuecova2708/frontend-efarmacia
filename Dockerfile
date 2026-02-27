@@ -2,23 +2,21 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Instalar dependencias del sistema
 RUN apk add --no-cache libc6-compat
 
-# Copiar manifiestos
 COPY package*.json ./
-
-# Instalar dependencias
 RUN npm install
 
-# Copiar todo el código
 COPY . .
 
-# Variables de build (se pasan como ARG para hornearlas en el bundle)
-ARG NEXT_PUBLIC_API_URL
+# BACKEND_URL se hornea en el bundle de Next.js durante el build
+# El valor por defecto es la URL de producción del backend
+ARG BACKEND_URL=https://efarmacia-back.duckdns.org
+ENV BACKEND_URL=$BACKEND_URL
+
+ARG NEXT_PUBLIC_API_URL=https://efarmacia-back.duckdns.org
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Compilar Next.js
 RUN npm run build
 
 # ============================================================
@@ -32,7 +30,6 @@ RUN apk add --no-cache libc6-compat
 
 ENV NODE_ENV=production
 
-# Copiar solo lo necesario para producción
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
