@@ -12,6 +12,25 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  images: {
+    remotePatterns: [
+      // Permite imágenes firmadas de MinIO/S3 cuando se usa dominio HTTPS
+      // Ajusta el hostname al dominio real de tu instancia MinIO en Coolify
+      {
+        protocol: 'https',
+        hostname: '**.duckdns.org',
+        port: '',
+        pathname: '/**',
+      },
+      // Fallback para desarrollo local con MinIO en HTTP
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '9000',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

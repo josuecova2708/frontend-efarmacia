@@ -84,8 +84,7 @@ export default function AdminLayout({
           .slice(0, 3)
           .map(
             item =>
-              `<li style="text-align:left;margin-bottom:4px;"><strong>${item.producto.nombre}</strong> &mdash; ${
-                item.type === "STOCK_BAJO" ? "Stock critico" : "Vencimiento inminente"
+              `<li style="text-align:left;margin-bottom:4px;"><strong>${item.producto.nombre}</strong> &mdash; ${item.type === "STOCK_BAJO" ? "Stock critico" : "Vencimiento inminente"
               }</li>`,
           )
           .join("");
@@ -120,10 +119,9 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!canAlertRead) return;
-    const base = process.env.NEXT_PUBLIC_API_URL ?? "";
-    if (!base) return;
-    const sanitizedBase = base.replace(/\/$/, "");
-    const streamUrl = `${sanitizedBase}/alerts/stream`;
+    // Usar el rewrite proxy de Next.js para que las cookies de sesión
+    // se reenvíen automáticamente al backend (evita el 401).
+    const streamUrl = `/api/alerts/stream`;
     let source: EventSource | null = null;
     try {
       source = new EventSource(streamUrl, { withCredentials: true });
@@ -309,21 +307,18 @@ export default function AdminLayout({
 
       {/* Sidebar móvil (overlay) */}
       <div
-        className={`fixed inset-0 z-50 md:hidden transition ${
-          openMobile ? "pointer-events-auto" : "pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-50 md:hidden transition ${openMobile ? "pointer-events-auto" : "pointer-events-none"
+          }`}
       >
         <div
-          className={`absolute inset-0 bg-black/40 transition-opacity ${
-            openMobile ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute inset-0 bg-black/40 transition-opacity ${openMobile ? "opacity-100" : "opacity-0"
+            }`}
           onClick={() => setOpenMobile(false)}
         />
         <div
           id="mobile-sidebar"
-          className={`absolute top-14 bottom-0 left-0 w-72 max-w-[80%] bg-white shadow-xl transform transition-transform ${
-            openMobile ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`absolute top-14 bottom-0 left-0 w-72 max-w-[80%] bg-white shadow-xl transform transition-transform ${openMobile ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <AdminSidebar onNavigate={() => setOpenMobile(false)} />
         </div>
