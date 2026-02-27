@@ -9,12 +9,12 @@ RUN npm install
 
 COPY . .
 
-# BACKEND_URL se hornea en el bundle de Next.js durante el build
-# El valor por defecto es la URL de producción del backend
-ARG BACKEND_URL=https://efarmacia-back.duckdns.org
+# BACKEND_URL y NEXT_PUBLIC_API_URL deben incluir /api al final
+# porque los route handlers hacen: `${NEXT_PUBLIC_API_URL}/auth/login`
+ARG BACKEND_URL=https://efarmacia-back.duckdns.org/api
 ENV BACKEND_URL=$BACKEND_URL
 
-ARG NEXT_PUBLIC_API_URL=https://efarmacia-back.duckdns.org
+ARG NEXT_PUBLIC_API_URL=https://efarmacia-back.duckdns.org/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN npm run build
