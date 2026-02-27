@@ -9,11 +9,11 @@ RUN npm install
 
 COPY . .
 
-# BACKEND_URL y NEXT_PUBLIC_API_URL deben incluir /api al final
-# porque los route handlers hacen: `${NEXT_PUBLIC_API_URL}/auth/login`
-ARG BACKEND_URL=https://efarmacia-back.duckdns.org/api
+# BACKEND_URL: sin /api — el rewrite en next.config.ts ya lo añade: `${backendUrl}/api/:path*`
+ARG BACKEND_URL=https://efarmacia-back.duckdns.org
 ENV BACKEND_URL=$BACKEND_URL
 
+# NEXT_PUBLIC_API_URL: con /api — los route handlers hacen `${NEXT_PUBLIC_API_URL}/marcas`
 ARG NEXT_PUBLIC_API_URL=https://efarmacia-back.duckdns.org/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
