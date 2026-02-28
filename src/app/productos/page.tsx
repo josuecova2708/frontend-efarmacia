@@ -35,7 +35,7 @@ function ProductosContent() {
     const fetchData = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
-          fetch(`/api/public/productos?limit=100`),
+          fetch(`/api/public/productos`),
           fetch(`/api/public/categorias`),
         ]);
 
