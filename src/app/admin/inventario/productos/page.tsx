@@ -122,12 +122,12 @@ export default function ProductosAdmin() {
     stockMinimo: 0,
     stockActual: 0,
     activo: true,
-  requiereReceta: false,
-  marcaId: "",
-  categoriaId: "",
-  unidadId: "",
-  proveedorId: "",
-  imageFile: null as File | null,
+    requiereReceta: false,
+    marcaId: "",
+    categoriaId: "",
+    unidadId: "",
+    proveedorId: "",
+    imageFile: null as File | null,
     imageUrl: "",
     imageKey: "",
   });
@@ -457,9 +457,8 @@ export default function ProductosAdmin() {
 
       Swal.fire({
         title: "Exito",
-        text: `Producto ${
-          editingProduct ? "actualizado" : "creado"
-        } correctamente`,
+        text: `Producto ${editingProduct ? "actualizado" : "creado"
+          } correctamente`,
         icon: "success",
       });
       setShowModal(false);
@@ -853,11 +852,10 @@ export default function ProductosAdmin() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
-                          isLowStock
+                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${isLowStock
                             ? "bg-rose-50 text-rose-700"
                             : "bg-emerald-50 text-emerald-700"
-                        }`}
+                          }`}
                       >
                         {stockActual}
                         {isLowStock && (
@@ -869,11 +867,10 @@ export default function ProductosAdmin() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                          producto.activo
+                        className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${producto.activo
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
                         {producto.activo ? "Activo" : "Inactivo"}
                       </span>
@@ -1265,25 +1262,84 @@ export default function ProductosAdmin() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Imagen
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Imagen del producto
                 </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="mt-1 block w-full border rounded-md px-3 py-2"
-                  onChange={handleImageChange}
-                />
-                {formData.imageUrl && (
-                  <NextImage
-                    src={formData.imageUrl}
-                    alt="Vista previa del producto"
-                    width={80}
-                    height={80}
-                    className="mt-2 h-20 w-20 rounded object-cover"
-                    unoptimized
-                  />
+
+                {/* Vista previa de imagen actual (solo en modo edición) */}
+                {editingProduct && formData.imageUrl && !formData.imageFile && (
+                  <div className="mb-3 flex items-start gap-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                    <NextImage
+                      src={formData.imageUrl}
+                      alt="Imagen actual del producto"
+                      width={96}
+                      height={96}
+                      className="h-24 w-24 rounded-lg object-cover border border-emerald-300 shadow-sm flex-shrink-0"
+                      unoptimized
+                    />
+                    <div className="text-sm text-emerald-800">
+                      <p className="font-medium">Imagen actual</p>
+                      <p className="text-xs text-emerald-600 mt-1">
+                        Selecciona un nuevo archivo abajo para reemplazarla. Si no seleccionas ninguno, la imagen actual se conservará.
+                      </p>
+                    </div>
+                  </div>
                 )}
+
+                {/* Preview de nueva imagen seleccionada */}
+                {formData.imageFile && (
+                  <div className="mb-3 flex items-start gap-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <NextImage
+                      src={URL.createObjectURL(formData.imageFile)}
+                      alt="Nueva imagen seleccionada"
+                      width={96}
+                      height={96}
+                      className="h-24 w-24 rounded-lg object-cover border border-amber-300 shadow-sm flex-shrink-0"
+                      unoptimized
+                    />
+                    <div className="text-sm text-amber-800">
+                      <p className="font-medium">Nueva imagen seleccionada</p>
+                      <p className="text-xs text-amber-600 mt-1">
+                        Esta imagen se subirá al guardar el producto.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({ ...prev, imageFile: null }))
+                        }
+                        className="mt-2 text-xs text-red-600 hover:underline"
+                      >
+                        ✕ Cancelar selección
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Input de archivo */}
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="product-image-input"
+                    className="absolute inset-0 opacity-0 w-full cursor-pointer"
+                    onChange={handleImageChange}
+                  />
+                  <label
+                    htmlFor="product-image-input"
+                    className="flex items-center gap-2 cursor-pointer rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 transition"
+                  >
+                    <ImageIcon size={18} />
+                    {editingProduct
+                      ? formData.imageFile
+                        ? "Cambiar archivo seleccionado"
+                        : formData.imageUrl
+                          ? "Reemplazar imagen actual"
+                          : "Subir imagen"
+                      : formData.imageFile
+                        ? formData.imageFile.name
+                        : "Seleccionar imagen (JPG, PNG, WebP)"}
+                  </label>
+                </div>
               </div>
 
               {!editingProduct && (

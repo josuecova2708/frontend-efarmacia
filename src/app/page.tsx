@@ -377,21 +377,13 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <button
-              onClick={() => setSelectedCategory("")}
-              className={`group flex flex-col items-center p-6 rounded-2xl shadow-sm hover:shadow-lg transition ${
-                selectedCategory === ""
-                  ? "bg-emerald-50 border border-emerald-200"
-                  : "bg-white border"
-              }`}
+              onClick={() => router.push("/productos")}
+              className="group flex flex-col items-center p-6 rounded-2xl shadow-sm hover:shadow-lg transition bg-white border hover:border-emerald-200 hover:bg-emerald-50"
             >
               <div className="h-20 w-20 flex items-center justify-center rounded-full bg-emerald-100 mb-3 text-3xl">
                 📦
               </div>
-              <span
-                className={`font-semibold ${
-                  selectedCategory === "" ? "text-emerald-700" : "group-hover:text-emerald-700"
-                }`}
-              >
+              <span className="font-semibold group-hover:text-emerald-700">
                 Todos
               </span>
               <span className="text-sm text-zinc-500">Ver todos →</span>
@@ -400,30 +392,24 @@ export default function HomePage() {
             {loadingCats
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={`cat-skel-${i}`} />)
               : topCategorias.map((categoria) => (
-                  <button
-                    key={categoria.id}
-                    onClick={() => setSelectedCategory(categoria.nombre)}
-                    className={`group flex flex-col items-center p-6 rounded-2xl shadow-sm hover:shadow-lg transition ${
-                      selectedCategory === categoria.nombre
-                        ? "bg-emerald-50 border border-emerald-200"
-                        : "bg-white border"
-                    }`}
-                  >
-                    <div className="h-20 w-20 flex items-center justify-center rounded-full bg-emerald-100 mb-3 text-3xl">
-                      🏷️
-                    </div>
-                    <span
-                      className={`font-semibold ${
-                        selectedCategory === categoria.nombre
-                          ? "text-emerald-700"
-                          : "group-hover:text-emerald-700"
-                      }`}
-                    >
-                      {categoria.nombre}
-                    </span>
-                    <span className="text-sm text-zinc-500">Ver más →</span>
-                  </button>
-                ))}
+                <button
+                  key={categoria.id}
+                  onClick={() =>
+                    router.push(
+                      `/productos?cat=${encodeURIComponent(categoria.nombre)}`
+                    )
+                  }
+                  className="group flex flex-col items-center p-6 rounded-2xl shadow-sm hover:shadow-lg transition bg-white border hover:border-emerald-200 hover:bg-emerald-50"
+                >
+                  <div className="h-20 w-20 flex items-center justify-center rounded-full bg-emerald-100 mb-3 text-3xl">
+                    🏷️
+                  </div>
+                  <span className="font-semibold group-hover:text-emerald-700">
+                    {categoria.nombre}
+                  </span>
+                  <span className="text-sm text-zinc-500">Ver más →</span>
+                </button>
+              ))}
           </div>
         </Container>
       </section>
@@ -449,7 +435,7 @@ export default function HomePage() {
             {loadingRecs
               ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={`recs-skel-${i}`} />)
               : recs.length > 0
-              ? recs.map((p) => (
+                ? recs.map((p) => (
                   <ProductCard
                     key={p.id}
                     producto={p}
@@ -457,11 +443,11 @@ export default function HomePage() {
                     onAdd={addToCarrito}
                   />
                 ))
-              : (
-                <div className="col-span-full text-center py-8 text-zinc-500">
-                  Aún no tenemos suficientes datos para recomendarte. Explora algunos productos y vuelve pronto. 😊
-                </div>
-              )}
+                : (
+                  <div className="col-span-full text-center py-8 text-zinc-500">
+                    Aún no tenemos suficientes datos para recomendarte. Explora algunos productos y vuelve pronto. 😊
+                  </div>
+                )}
           </div>
         </Container>
       </section>
@@ -484,7 +470,7 @@ export default function HomePage() {
             {loadingProd
               ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={`prod-skel-${i}`} />)
               : productos.length > 0
-              ? productos.map((p) => (
+                ? productos.map((p) => (
                   <ProductCard
                     key={p.id}
                     producto={p}
@@ -492,13 +478,13 @@ export default function HomePage() {
                     onAdd={addToCarrito}
                   />
                 ))
-              : (
-                <div className="col-span-full text-center py-10 text-zinc-500">
-                  {selectedCategory
-                    ? `No hay productos en "${selectedCategory}"`
-                    : "No hay productos disponibles"}
-                </div>
-              )}
+                : (
+                  <div className="col-span-full text-center py-10 text-zinc-500">
+                    {selectedCategory
+                      ? `No hay productos en "${selectedCategory}"`
+                      : "No hay productos disponibles"}
+                  </div>
+                )}
           </div>
         </Container>
       </section>

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 
 interface Producto {
   id: number;
   nombre: string;
   descripcion?: string;
-  imageUrl?: string; // 👈 Viene directo de S3
+  imageUrl?: string;
   imageKey?: string;
   marca: { nombre: string };
   categoria: { nombre: string };
@@ -19,11 +20,16 @@ interface Categoria {
   nombre: string;
 }
 
-export default function ProductosPage() {
+function ProductosContent() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const catParam = searchParams.get("cat") ?? "";
+
+  // Refs por categoría para hacer scroll
+  const catRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,13 +41,10 @@ export default function ProductosPage() {
 
         if (prodRes.ok) {
           const data = await prodRes.json();
-          // await logOk("Cargar Productos", { userId, ip });
-          console.log("📦 Productos desde API:", data);
           setProductos(data);
         }
         if (catRes.ok) {
           const data = await catRes.json();
-          console.log("📂 Categorías desde API:", data);
           setCategorias(data);
         }
       } catch (error) {
@@ -54,9 +57,23 @@ export default function ProductosPage() {
     fetchData();
   }, []);
 
-  // filtro por búsqueda
+  // Scroll a la categoría indicada en el param ?cat= después de cargar
+  useEffect(() => {
+    if (!catParam || loading) return;
+    // Pequeño delay para que los refs estén montados
+    const timer = setTimeout(() => {
+      const el = catRefs.current[catParam];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [catParam, loading]);
+
+  // filtro por búsqueda de texto
   const filtered = productos.filter((p) =>
-    p.nombre.toLowerCase().includes(q.toLowerCase())
+    p.nombre.toLowerCase().includes(q.toLowerCase()) ||
+    p.categoria?.nombre.toLowerCase().includes(q.toLowerCase())
   );
 
   // agrupar productos por categoría
@@ -73,11 +90,12 @@ export default function ProductosPage() {
         {/* Header con buscador */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-extrabold text-zinc-900">
-            Nuestros productos
+            {catParam ? `Categoría: ${catParam}` : "Nuestros productos"}
           </h1>
           <p className="text-zinc-600 text-sm">
-            Explora nuestro catálogo de medicamentos, dermocosmética y
-            bienestar.
+            {catParam
+              ? `Mostrando productos de "${catParam}"`
+              : "Explora nuestro catálogo de medicamentos, dermocosmética y bienestar."}
           </p>
         </div>
 
@@ -89,7 +107,7 @@ export default function ProductosPage() {
             </span>
             <input
               className="pl-9 pr-3 py-2 w-full border rounded-full shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
-              placeholder="Buscar producto..."
+              placeholder="Buscar producto o categoría..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
@@ -122,15 +140,32 @@ export default function ProductosPage() {
               const productosDeCat = groupedByCategory[cat.nombre];
               if (!productosDeCat || productosDeCat.length === 0) return null;
 
+              const isHighlighted =
+                catParam &&
+                cat.nombre.toLowerCase() === catParam.toLowerCase();
+
               return (
-                <div key={cat.id} className="space-y-6">
+                <div
+                  key={cat.id}
+                  ref={(el) => {
+                    catRefs.current[cat.nombre] = el;
+                  }}
+                  className={`space-y-6 scroll-mt-20 rounded-2xl transition-all ${isHighlighted
+                    ? "ring-2 ring-emerald-400 ring-offset-4 bg-emerald-50/40 p-4"
+                    : ""
+                    }`}
+                >
                   {/* Encabezado de categoría */}
                   <div className="flex items-center justify-between relative">
                     <h2 className="text-xl font-bold text-emerald-800 flex items-center gap-3">
-                      <span className="px-4 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full shadow-sm">
+                      <span
+                        className={`px-4 py-1.5 border rounded-full shadow-sm ${isHighlighted
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-emerald-50 border-emerald-200"
+                          }`}
+                      >
                         {cat.nombre}
                       </span>
-                      <span className="hidden md:block h-[2px] w-200 bg-gradient-to-r from-emerald-200 to-transparent rounded-full" />
                     </h2>
                     <a
                       href={`/productos?cat=${encodeURIComponent(cat.nombre)}`}
@@ -148,7 +183,7 @@ export default function ProductosPage() {
                         productoId={p.id}
                         nombre={p.nombre}
                         precio={p.precio ?? 0}
-                        imagen={p.imageUrl} // 👈 Aquí va directo desde S3
+                        imagen={p.imageUrl}
                         marca={p.marca?.nombre}
                       />
                     ))}
@@ -166,5 +201,13 @@ export default function ProductosPage() {
         </p>
       </div>
     </section>
+  );
+}
+
+export default function ProductosPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center text-zinc-400">Cargando...</div>}>
+      <ProductosContent />
+    </Suspense>
   );
 }
